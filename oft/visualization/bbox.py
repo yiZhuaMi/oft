@@ -36,7 +36,7 @@ def draw_bbox3d(obj, calib, ax, color='b'):
     corners = utils.bbox_corners(obj)
 
     # Project into image coordinates
-    img_corners = utils.perspective(calib, corners).numpy()
+    img_corners = utils.perspective(calib.cuda(), corners.cuda()).cpu().numpy()
 
     # Draw polygons
     # Front face
@@ -57,7 +57,7 @@ def visualize_objects(image, calib, objects, cmap='tab20', ax=None):
     ax.clear()
 
     # Visualize image
-    ax.imshow(image.permute(1, 2, 0).numpy())
+    ax.imshow(image.permute(1, 2, 0).cpu().numpy())
     extents = ax.axis()
 
     # Visualize objects

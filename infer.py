@@ -9,13 +9,13 @@ from oft import KittiObjectDataset, OftNet, ObjectEncoder, visualize_objects
 def parse_args():
     parser = ArgumentParser()
 
-    parser.add_argument('model-path', type=str,
+    parser.add_argument('--model-path', type=str,
                         help='path to checkpoint file containing trained model')
     parser.add_argument('-g', '--gpu', type=int, default=0,
                         help='gpu to use for inference (-1 for cpu)')
     
     # Data options
-    parser.add_argument('--root', type=str, default='data/kitti',
+    parser.add_argument('--root', type=str, default='/data2/yzy/kitti',
                         help='root directory of the KITTI dataset')
     parser.add_argument('--grid-size', type=float, nargs=2, default=(80., 80.),
                         help='width and depth of validation grid, in meters')
@@ -57,6 +57,7 @@ def main():
     
     # Load checkpoint
     ckpt = torch.load(args.model_path)
+    model = torch.nn.DataParallel(model)
     model.load_state_dict(ckpt['model'])
 
     # Create encoder
@@ -65,10 +66,11 @@ def main():
     # Set up plots
     _, (ax1, ax2) = plt.subplots(nrows=2)
     plt.ion()
-
+    i = 0
     # Iterate over validation images
     for _, image, calib, objects, grid in dataset:
-
+        print('{}\n'.format(i))
+        i += 1
         # Move tensors to gpu
         image = to_tensor(image)
         if args.gpu >= 0:
@@ -88,6 +90,7 @@ def main():
         ax2.set_title('Ground truth')
 
         plt.draw()
+        plt.savefig("{}.png".format(i))
         plt.pause(0.01)
         time.sleep(0.5)
 
